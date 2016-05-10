@@ -522,8 +522,15 @@ provision_wb.save(provision_name)
 
 #create formatting documentation
 print 'Writing Formatting Document'
-format_handle = open('Formatting_README.txt', 'a')
-format_handle.write('In Excel, you will need to complete the following formatting:\nColumn A, B, D, E will need a width of 27.00, Column c will need a width of 12.\nIf Needed, set the width of a column, right click the column letter and select column width then enter the width value. This only needs to be done if the columns are not already the correct size.\nYou will then need to verify the Fit All Columns to 1 Page in the print parameters\nto make sure that the cut sheets fit to one page.')
+format_handle = open('README.txt', 'a')
+format_handle.write('''
+In Excel, you will need to verify the following formatting:
+Column A, B, D, E will need a width of 27.00, Column c will need a width of 12.
+If Needed, set the width of a column, right click the column letter and select 
+column width then enter the width value. This only needs to be done if the columns
+are not already the correct size. You will then need to verify the Fit All 
+Columns to 1 Page in the print parameters to make sure that the cut sheets fit to
+one page per cutsheet.''')
 format_handle.close()
 
 #Success Notes
