@@ -4,13 +4,27 @@ from openpyxl.cell import get_column_letter, column_index_from_string, cell
 from openpyxl.styles import Font, Style, fills, PatternFill, Color, Alignment, Border, Side
 import os, ctypes, getpass, easygui
 
-#desired working directory
-working_directory = os.path.join('c:\users\\', os.getenv('username'), 'Desktop\ProvisioningSheets')
+#Get proper user profile name from current envrionment user
+current_user = os.getenv('username')
+user_profile_path1 = os.path.join('c:\users\\', current_user)
 
-#check to see if directory exists and create it if not
-if not os.path.exists(working_directory):
-    os.makedirs(working_directory)
-	
+#For users with two names isolate the first name as the user profile name
+space_pos = current_user.find(' ')
+user_profile_first = current_user[:space_pos]
+user_profile_path2 = os.path.join('c:\users\\', user_profile_first)
+
+#Select the proper user profile, and create the working directory if not already present
+if os.path.exists(user_profile_path1):
+	working_directory = os.path.join('c:\users\\', current_user, 'Desktop\ProvisioningSheets')
+	if not os.path.exists(working_directory):
+		os.makedirs(working_directory)
+elif os.path.exists(user_profile_path2):
+	working_directory = os.path.join('c:\users\\', user_profile_first, 'Desktop\ProvisioningSheets')
+	if not os.path.exists(working_directory):
+		os.makedirs(working_directory)
+else:
+	ctypes.windll.user32.MessageBoxA(0, 'No Valid User Profile. Conact the System Admin for Assistance!', 'User Profile Error!', 1)
+	exit()
 #Change the working directory
 os.chdir(working_directory)
 
@@ -19,7 +33,7 @@ os.chdir(working_directory)
 ctypes.windll.user32.MessageBoxA(0, 'Move linear inventory to ' + working_directory + ' then select ok', 'Move Linear Inventory', 1)
 
 #get linear inventory name and load as a workbook
-
+error_count = 0
 while True:
 	ctypes.windll.user32.MessageBoxA(0, 'Open your Linear Inventory', 'Open', 1)
 	linear = easygui.fileopenbox()
@@ -27,8 +41,13 @@ while True:
 		linear_wb = load_workbook(filename = linear, use_iterators = True)
 		break
 	except:
-		ctypes.windll.user32.MessageBoxA(0, 'Please enter a valid linear inventory name', 'Import Error!', 1)
-		continue
+		if error_count <= 3:
+			ctypes.windll.user32.MessageBoxA(0, 'Please enter a valid linear inventory name', 'Import Error!', 1)
+			error_count += 1
+			continue
+		else:
+			ctypes.windll.user32.MessageBoxA(0, 'Error Limit Exceeded. Quitting Application!', 'Import Error!', 1)
+			exit()
 active_sheet = linear_wb.get_sheet_names()[0]
 working_sheet = linear_wb.get_sheet_by_name(active_sheet) 
 
@@ -521,9 +540,11 @@ provision_sheet.header_footer.center_footer.font_size = 10
 provision_wb.save(provision_name)
 
 #create formatting documentation
-print 'Writing Formatting Document'
-format_handle = open('README.txt', 'a')
-format_handle.write('''
+print 'Writing Formatting Document...'
+readme_dir = os.path.join(working_directory, 'README.txt')
+if not os.path.exists(readme_dir):
+	format_handle = open('README.txt', 'a')
+	format_handle.write('''
 In Excel, you will need to verify the following formatting:
 Column A, B, D, E will need a width of 27.00, Column c will need a width of 12.
 If Needed, set the width of a column, right click the column letter and select 
@@ -531,7 +552,7 @@ column width then enter the width value. This only needs to be done if the colum
 are not already the correct size. You will then need to verify the Fit All 
 Columns to 1 Page in the print parameters to make sure that the cut sheets fit to
 one page per cutsheet.''')
-format_handle.close()
+	format_handle.close()
 
 #Success Notes
 print 'Cut Sheets Compiled Successfully!'
