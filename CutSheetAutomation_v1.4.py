@@ -2,7 +2,7 @@
 from openpyxl import Workbook, load_workbook
 from openpyxl.cell import get_column_letter, column_index_from_string, cell
 from openpyxl.styles import Font, Style, fills, PatternFill, Color, Alignment, Border, Side
-import os, ctypes, getpass, easygui
+import os, ctypes, getpass, easygui, Tkinter
 
 #Get proper user profile name from current envrionment user
 current_user = os.getenv('username')
